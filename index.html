@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Values Quest Quiz</title>
+<style>
+:root{
+  --bg1:#fff4e0; --bg2:#ffe3ec; --ink:#2d2a3a; --card:#ffffff;
+  --purple:#7c5cff; --pink:#ff6fa5; --yellow:#ffc93c; --green:#3ecf8e; --red:#ff5d5d;
+  --shadow: rgba(45,42,58,0.15);
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  box-sizing:border-box;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg1:#241f38; --bg2:#2e2148; --ink:#f3eefc; --card:#332b52; --shadow: rgba(0,0,0,0.4);
+  }
+}
+:root[data-theme="dark"]{
+  --bg1:#241f38; --bg2:#2e2148; --ink:#f3eefc; --card:#332b52; --shadow: rgba(0,0,0,0.4);
+}
+html{scroll-padding-top: env(safe-area-inset-top, 0px);}
+*{box-sizing:border-box;}
+body{
+  margin:0; min-height:100%;
+  background: radial-gradient(circle at 20% 10%, var(--bg2), var(--bg1) 60%);
+  font-family: 'Baloo 2', 'Comic Sans MS', 'Trebuchet MS', sans-serif;
+  color:var(--ink);
+  display:flex; justify-content:center;
+}
+@font-face{ font-family:'Baloo 2'; src: local('Baloo 2'); }
+.wrap{ width:100%; max-width:640px; padding:1rem 1rem 2rem; }
+
+/* header */
+.top{ display:flex; align-items:center; justify-content:space-between; margin-bottom:.6rem; gap:.5rem;}
+.title{ font-size:1.5rem; font-weight:800; margin:0; }
+.title span{ color:var(--purple); }
+.stats{ display:flex; gap:.5rem; align-items:center; font-weight:700; }
+.pill{ background:var(--card); border-radius:999px; padding:.35rem .7rem; box-shadow:0 4px 0 var(--shadow); font-size:.95rem; display:flex; align-items:center; gap:.3rem;}
+.progress-track{ height:14px; background:var(--card); border-radius:999px; overflow:hidden; box-shadow:inset 0 2px 4px var(--shadow); margin-bottom:1rem;}
+.progress-fill{ height:100%; width:0%; background:linear-gradient(90deg,var(--purple),var(--pink)); border-radius:999px; transition:width .5s ease;}
+
+/* card */
+.card{
+  background:var(--card); border-radius:24px; padding:1.4rem 1.2rem 1.6rem;
+  box-shadow:0 10px 0 var(--shadow); position:relative; overflow:hidden;
+  animation: popIn .35s ease;
+}
+@keyframes popIn{ from{ transform:scale(.9) translateY(10px); opacity:0;} to{ transform:scale(1) translateY(0); opacity:1;} }
+.badge{ display:inline-block; background:var(--yellow); color:#5c4400; font-weight:800; font-size:.8rem; padding:.25rem .6rem; border-radius:999px; margin-bottom:.6rem;}
+.question{ font-size:1.25rem; font-weight:800; line-height:1.4; margin:0 0 1rem; }
+.options{ display:grid; gap:.6rem; }
+.opt{
+  text-align:left; border:none; border-radius:16px; padding:.8rem 1rem; font-size:1.05rem; font-weight:700;
+  background: var(--bg1); color:var(--ink); cursor:pointer; box-shadow:0 4px 0 var(--shadow);
+  transition: transform .1s ease;
+  display:flex; align-items:center; gap:.6rem;
+}
+:root[data-theme="dark"] .opt, @media (prefers-color-scheme: dark){ .opt{ background:#3d3460; } }
+.opt:active{ transform:translateY(2px); }
+.opt .letter{ background:var(--purple); color:white; border-radius:50%; width:1.7rem; height:1.7rem; display:flex; align-items:center; justify-content:center; font-size:.9rem; flex-shrink:0;}
+.opt.correct{ background:var(--green) !important; color:white; }
+.opt.correct .letter{ background:white; color:var(--green); }
+.opt.wrong{ background:var(--red) !important; color:white; }
+.opt.wrong .letter{ background:white; color:var(--red); }
+.opt.disabled{ pointer-events:none; opacity:.55; }
+.opt.disabled.correct, .opt.disabled.wrong{ opacity:1; }
+
+.feedback{ margin-top:1rem; padding:.8rem 1rem; border-radius:16px; font-weight:800; display:none; align-items:center; gap:.5rem; font-size:1.05rem;}
+.feedback.show{ display:flex; animation: popIn .25s ease; }
+.feedback.good{ background:#e5faf1; color:#1a8f5d; }
+.feedback.bad{ background:#ffeaea; color:#c23b3b; }
+:root[data-theme="dark"] .feedback.good{ background:#123c2c; color:#7bf0bf;}
+:root[data-theme="dark"] .feedback.bad{ background:#402328; color:#ff9c9c;}
+
+.nextBtn{
+  margin-top:1.1rem; width:100%; border:none; border-radius:16px; padding:.85rem; font-size:1.1rem; font-weight:800;
+  background:var(--purple); color:white; box-shadow:0 5px 0 #5b3fd6; cursor:pointer; display:none;
+}
+.nextBtn.show{ display:block; animation: popIn .25s ease; }
+.nextBtn:active{ transform:translateY(3px); box-shadow:0 2px 0 #5b3fd6; }
+
+/* mascot bubble */
+.mascot{ text-align:center; font-size:2.6rem; margin-bottom:.3rem; }
+
+/* end screen */
+.end{ text-align:center; }
+.end h2{ font-size:1.8rem; margin-bottom:.2rem; }
+.trophy{ font-size:4rem; margin:.3rem 0; }
+.scoreBig{ font-size:2.2rem; font-weight:800; color:var(--purple); }
+.restart{ margin-top:1.2rem; }
+
+/* confetti */
+.confetti-piece{ position:fixed; top:-10px; z-index:999; border-radius:2px; pointer-events:none; }
+
+/* stars row */
+.starsRow{ display:flex; justify-content:center; gap:.3rem; margin:.6rem 0 1rem; font-size:1.6rem; }
+.starsRow span{ opacity:.25; transition: all .3s; }
+.starsRow span.lit{ opacity:1; transform:scale(1.2); }
+
+footer.credit{ text-align:center; opacity:.5; font-size:.75rem; margin-top:1rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <p class="title">🌟 <span>Values</span> Quiz</p>
+    <div class="stats">
+      <div class="pill">💎 <span id="scoreLabel">0</span></div>
+      <div class="pill">🔥 <span id="streakLabel">0</span></div>
+    </div>
+  </div>
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  <div id="quizArea"></div>
+</div>
+
+<script>
+const QUESTIONS = [
+  {tag:"Vocabulary", q:"________ means who a person is.", opts:["Identity","Strength","Confidence","Challenge"], correct:0, explain:"Identity is who a person is — their name, personality, and what makes them, them!"},
+  {tag:"Vocabulary", q:"My best friend is always ________ when I have a problem.", opts:["lazy","careless","silent","supportive"], correct:3, explain:"A good friend is supportive — they help you when things are hard."},
+  {tag:"Antonyms", q:"The antonym (opposite) of \"stressed\" is ________.", opts:["relaxed","worried","shocked","angry"], correct:0, explain:"Stressed means worried and tense — the opposite feeling is relaxed and calm."},
+  {tag:"Prefixes", q:"We add the prefix \"________\" to make the opposite of \"patient\".", opts:["in-","im-","ir-","un-"], correct:1, explain:"Patient → impatient. Before words starting with 'p', we usually use the prefix im-."},
+  {tag:"Vocabulary", q:"Self ________ is a quality that makes you sure of your abilities.", opts:["strengths","confidence","weakness","challenge"], correct:1, explain:"Self-confidence means feeling sure about yourself and your abilities."},
+  {tag:"Vocabulary", q:"________ helps you keep going and overcome life's challenges.", opts:["Weakness","Determination","Silence","Confusion"], correct:1, explain:"Determination is not giving up — it helps you push through challenges!"},
+  {tag:"Reading", q:"\"Values help us decide what is right. THEY help us decide.\" What does THEY refer to?", opts:["people","values","schools","communities"], correct:1, explain:"THEY replaces the word 'values' from the sentence before it."},
+  {tag:"Reading", q:"\"Some COMMON values are honesty and kindness.\" COMMON most likely means...", opts:["ordinary","special","private","unusual"], correct:0, explain:"Common here means ordinary — values that many people share."},
+  {tag:"Reading", q:"\"These values SHAPE our behaviour.\" SHAPE means...", opts:["write","win","form","fear"], correct:2, explain:"To shape something means to form it or give it structure."},
+  {tag:"Grammar", q:"Rewrite: \"I have already done my homework.\" using YET.", opts:["I haven't done my homework yet.","I have done my homework yet.","I already haven't homework.","I have yet done my homework."], correct:0, explain:"With 'yet', we use the negative form: haven't + past participle + yet."},
+  {tag:"Grammar", q:"\"Yossif has traveled to Aswan.\" Ask a question starting with WHERE.", opts:["Where has Yossif traveled?","Where did Yossif travel?","Where Yossif has traveled?","Where travels Yossif?"], correct:0, explain:"Question word + has + subject + past participle: Where has Yossif traveled?"},
+  {tag:"Grammar", q:"Logy ________ tidied her room yet.", opts:["hasn't","has","haven't","doesn't"], correct:0, explain:"Logy is singular, so we use hasn't with 'yet' in the negative present perfect."},
+  {tag:"Grammar", q:"I have known him since we ________ children.", opts:["were","are","was","be"], correct:0, explain:"'Since' is followed by a past simple verb — 'we were children' is correct."}
+];
+
+let idx = 0, score = 0, streak = 0, answered = false;
+const quizArea = document.getElementById('quizArea');
+const progressFill = document.getElementById('progressFill');
+const scoreLabel = document.getElementById('scoreLabel');
+const streakLabel = document.getElementById('streakLabel');
+
+// ---- sound effects (Web Audio, no external files) ----
+let actx;
+function ctx(){ if(!actx){ actx = new (window.AudioContext||window.webkitAudioContext)(); } return actx; }
+function tone(freq, start, dur, type='sine', gain=0.2){
+  const c = ctx();
+  const o = c.createOscillator(); const g = c.createGain();
+  o.type = type; o.frequency.value = freq;
+  o.connect(g); g.connect(c.destination);
+  g.gain.setValueAtTime(gain, c.currentTime+start);
+  g.gain.exponentialRampToValueAtTime(0.001, c.currentTime+start+dur);
+  o.start(c.currentTime+start); o.stop(c.currentTime+start+dur+0.02);
+}
+function playCorrect(){ tone(523,0,.12); tone(659,.1,.12); tone(784,.2,.18); }
+function playWrong(){ tone(180,0,.2,'sawtooth',0.15); tone(140,.15,.25,'sawtooth',0.12); }
+function playWin(){ [523,587,659,784,880].forEach((f,i)=>tone(f,i*.12,.18)); }
+
+function confettiBurst(){
+  const colors = ['#7c5cff','#ff6fa5','#ffc93c','#3ecf8e','#5ac8fa'];
+  for(let i=0;i<26;i++){
+    const el = document.createElement('div');
+    el.className = 'confetti-piece';
+    const size = 6+Math.random()*6;
+    el.style.width = size+'px'; el.style.height = size*0.6+'px';
+    el.style.left = (Math.random()*100)+'vw';
+    el.style.background = colors[Math.floor(Math.random()*colors.length)];
+    el.style.opacity = 1;
+    document.body.appendChild(el);
+    const duration = 1400+Math.random()*900;
+    const drift = (Math.random()-0.5)*160;
+    el.animate([
+      {transform:'translate(0,0) rotate(0deg)', opacity:1},
+      {transform:`translate(${drift}px, 100vh) rotate(${360+Math.random()*360}deg)`, opacity:0.9}
+    ], {duration, easing:'ease-in'});
+    setTimeout(()=>el.remove(), duration+50);
+  }
+}
+
+function render(){
+  answered = false;
+  const total = QUESTIONS.length;
+  progressFill.style.width = (idx/total*100)+'%';
+  if(idx >= total){ renderEnd(); return; }
+  const q = QUESTIONS[idx];
+  const letters = ['A','B','C','D'];
+  quizArea.innerHTML = `
+    <div class="mascot">${['🦉','🐯','🐸','🦊','🐵','🐨'][idx % 6]}</div>
+    <div class="card">
+      <span class="badge">${q.tag} · Question ${idx+1} of ${total}</span>
+      <p class="question">${q.q}</p>
+      <div class="options">
+        ${q.opts.map((o,i)=>`<button class="opt" data-i="${i}"><span class="letter">${letters[i]}</span><span>${o}</span></button>`).join('')}
+      </div>
+      <div class="feedback" id="feedback"></div>
+      <button class="nextBtn" id="nextBtn">Next Question ➜</button>
+    </div>`;
+  document.querySelectorAll('.opt').forEach(btn=>{
+    btn.addEventListener('click', ()=> selectAnswer(parseInt(btn.dataset.i)));
+  });
+  document.getElementById('nextBtn').addEventListener('click', ()=>{ idx++; render(); });
+}
+
+function selectAnswer(choice){
+  if(answered) return;
+  answered = true;
+  const q = QUESTIONS[idx];
+  const opts = document.querySelectorAll('.opt');
+  opts.forEach(o=>o.classList.add('disabled'));
+  const feedback = document.getElementById('feedback');
+  const nextBtn = document.getElementById('nextBtn');
+
+  if(choice === q.correct){
+    opts[choice].classList.add('correct');
+    score += 10; streak += 1;
+    scoreLabel.textContent = score; streakLabel.textContent = streak;
+    feedback.className = 'feedback show good';
+    feedback.innerHTML = `🎉 Awesome! That's correct! <br><span style="font-weight:600;font-size:.95rem;">${q.explain}</span>`;
+    playCorrect();
+    confettiBurst();
+  } else {
+    opts[choice].classList.add('wrong');
+    opts[q.correct].classList.add('correct');
+    streak = 0; streakLabel.textContent = streak;
+    feedback.className = 'feedback show bad';
+    feedback.innerHTML = `❌ Not quite! The correct answer is <strong>${q.opts[q.correct]}</strong>.<br><span style="font-weight:600;font-size:.95rem;">${q.explain}</span>`;
+    playWrong();
+  }
+  nextBtn.classList.add('show');
+  nextBtn.textContent = (idx === QUESTIONS.length-1) ? "See My Results 🏆" : "Next Question ➜";
+}
+
+function renderEnd(){
+  progressFill.style.width = '100%';
+  const total = QUESTIONS.length;
+  const pct = Math.round(score/(total*10)*100);
+  let trophy = '🥉', msg = "Good try! Keep practising!";
+  if(pct >= 90){ trophy='🏆'; msg="Superstar! You know your values!"; }
+  else if(pct >= 70){ trophy='🥇'; msg="Great job! You're doing brilliantly!"; }
+  else if(pct >= 50){ trophy='🥈'; msg="Nice work! You're getting there!"; }
+  const starCount = pct>=90?3: pct>=60?2: pct>=30?1:0;
+  quizArea.innerHTML = `
+    <div class="card end">
+      <div class="trophy">${trophy}</div>
+      <h2>${msg}</h2>
+      <div class="starsRow">
+        ${[0,1,2].map(i=>`<span class="${i<starCount?'lit':''}">⭐</span>`).join('')}
+      </div>
+      <p>Your Score</p>
+      <div class="scoreBig">${score} / ${total*10}</div>
+      <button class="nextBtn show restart" id="restartBtn">Play Again 🔄</button>
+    </div>`;
+  document.getElementById('restartBtn').addEventListener('click', ()=>{
+    idx=0; score=0; streak=0;
+    scoreLabel.textContent=0; streakLabel.textContent=0;
+    render();
+  });
+  playWin();
+  confettiBurst();
+  setTimeout(confettiBurst, 400);
+}
+
+render();
+</script>
+<footer class="credit">Values Quest • Interactive practice quiz</footer>
+</body>
+</html>
